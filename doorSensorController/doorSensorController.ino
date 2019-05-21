@@ -1,4 +1,3 @@
-
 #include <SimpleTimer.h> //https://github.com/jfturcot/SimpleTimer
 #include <PubSubClient.h> //https://github.com/knolleary/pubsubclient
 #include <ESP8266WiFi.h>
@@ -7,12 +6,12 @@
 #include <ArduinoOTA.h> //https://github.com/esp8266/Arduino/tree/master/libraries/ArduinoOTA
 
 //USER CONFIGURED SECTION START//
-const char* ssid = "YOUR_WIRELESS_SSID";
-const char* password = "YOUR_WIRELESS_SSID";
-const char* mqtt_server = "YOUR_MQTT_SERVER_ADDRESS";
-const int mqtt_port = YOUR_MQTT_SERVER_PORT;
-const char *mqtt_user = "YOUR_MQTT_USERNAME";
-const char *mqtt_pass = "YOUR_MQTT_PASSWORD";
+const char* ssid = "Morpheus";
+const char* password = "b5eea63f65";
+const char* mqtt_server = "192.168.0.3";
+const int mqtt_port = 1883;
+const char *mqtt_user = "CDW-SmartHouse";
+const char *mqtt_pass = "!M0rpheus";
 const char *mqtt_client_name = "DoorSensorController"; // Client connections can't have the same connection name
 //USER CONFIGURED SECTION END//
 
@@ -136,13 +135,15 @@ void getFrontState()
   int newStatus = digitalRead(frontPin);
   if(newStatus != frontOldStatus && newStatus == 0)
   {
-    client.publish("doors/Front","Closed", true);
+    client.publish("cmnd/security/doors/frontdoor","CLOSED", true);
     frontOldStatus = newStatus;
+    Serial.println("Door closed is published");
   }
   if(newStatus != frontOldStatus && newStatus == 1)
   {
-    client.publish("doors/Front","Open", true);
+    client.publish("cmnd/security/doors/frontdoor","OPEN", true);
     frontOldStatus = newStatus;
+    Serial.println("Door open is published");
   }
 }
 
