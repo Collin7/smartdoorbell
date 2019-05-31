@@ -24,33 +24,11 @@ SimpleTimer timer;
 bool alreadyTriggered = false;
 const int doorBellPin = 16; //marked as D0 on the board
 const int silencePin = 2;  //marked as D4 on the board
-//Door contacts
-const int frontDoorPin = 0; //marked as D3 on the board
-const int garageToHouseDoorPin = 5; //marked as D1 on the board
-const int patioDoorPin = 4; //marked as D2 on the board
-const int kitchenDoorPin = 14; //marked as D5 on the board
-const int mainGarageDoorPin = 12; //marked a6 D3 on the board
-const int backGarageDoorPin = 13; //marked a7 D3 on the board
-
-//Door status's
-int frontDoorOldStatus = 1;
-int garageToHouseDoorOldStatus = 1;
-int patioDoorOldStatus = 1;
-int kitchenDoorOldStatus = 1;
-int mainGarageDoorOldStatus = 1;
-int backGarageDoorOldStatus = 1;
 
 bool boot = true;
 
 //Topics
 const char* doorbellTopic = "cmnd/security/doorbell/commands";
-
-const char* frontDoorTopic = "cmnd/security/doors/frontdoor";
-const char* garageToHouseDoorTopic = "cmnd/security/doors/garagetohousedoor";
-const char* patioDoorTopic = "cmnd/security/doors/patiodoor";
-const char* kitchenDoorTopic = "cmnd/security/doors/kitchendoor";
-const char* mainGarageDoorTopic = "cmnd/security/doors/maingaragedoor";
-const char* backGarageDoorTopic = "cmnd/security/doors/backgaragedoor";
 
 //Functions
 
@@ -71,6 +49,8 @@ void setup_wifi() {
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
+  Serial.println("MAC Address: ");
+  Serial.println(WiFi.macAddress());
 }
 
 void reconnect() {
@@ -141,90 +121,6 @@ void resetTrigger() {
   alreadyTriggered = false;
 }
 
-void getFrontDoorState() {
-  int newStatus = digitalRead(frontDoorPin);
-  if (newStatus != frontDoorOldStatus && newStatus == 0) {
-    client.publish("cmnd/security/doors/frontdoor", "CLOSED", true);
-    frontDoorOldStatus = newStatus;
-    Serial.println("Front Door closed is published");
-  }
-  if (newStatus != frontDoorOldStatus && newStatus == 1) {
-    client.publish("cmnd/security/doors/frontdoor", "OPEN", true);
-    frontDoorOldStatus = newStatus;
-    Serial.println("Front Door open is published");
-  }
-}
-
-//void getGarageToHouseDoorState() {
-//  int newStatus = digitalRead(garageToHouseDoorPin);
-//  if (newStatus != garageToHouseDoorOldStatus && newStatus == 0) {
-//    client.publish(garageToHouseDoorTopic, CLOSED, true);
-//    garageToHouseDoorOldStatus = newStatus;
-//    Serial.println("Garage 2 House Door closed is published");
-//  }
-//  if (newStatus != garageToHouseDoorOldStatus && newStatus == 1) {
-//    client.publish(garageToHouseDoorTopic, OPEN, true);
-//    garageToHouseDoorOldStatus = newStatus;
-//    Serial.println("Garage 2 House Door open is published");
-//  }
-//}
-//
-//void getPatioDoorState() {
-//  int newStatus = digitalRead(patioDoorPin);
-//  if (newStatus != patioDoorOldStatus && newStatus == 0) {
-//    client.publish("cmnd/security/doors/frontdoor", "CLOSED", true);
-//    patioDoorOldStatus = newStatus;
-//    Serial.println("Patio Door closed is published");
-//  }
-//  if (newStatus != patioDoorPinOldStatus && newStatus == 1) {
-//    client.publish("cmnd/security/doors/frontdoor", "OPEN", true);
-//    patioDoorOldStatus = newStatus;
-//    Serial.println("Patio Door open is published");
-//  }
-//}
-
-//void getKitchenDoorState() {
-//  int newStatus = digitalRead(frontDoorPin);
-//  if (newStatus != frontOldStatus && newStatus == 0) {
-//    client.publish("cmnd/security/doors/frontdoor", "CLOSED", true);
-//    frontOldStatus = newStatus;
-//    Serial.println("Door closed is published");
-//  }
-//  if (newStatus != frontOldStatus && newStatus == 1) {
-//    client.publish("cmnd/security/doors/frontdoor", "OPEN", true);
-//    frontOldStatus = newStatus;
-//    Serial.println("Door open is published");
-//  }
-//}
-//
-//void getMainGarageDoorState() {
-//  int newStatus = digitalRead(frontDoorPin);
-//  if (newStatus != frontOldStatus && newStatus == 0) {
-//    client.publish("cmnd/security/doors/frontdoor", "CLOSED", true);
-//    frontOldStatus = newStatus;
-//    Serial.println("Door closed is published");
-//  }
-//  if (newStatus != frontOldStatus && newStatus == 1) {
-//    client.publish("cmnd/security/doors/frontdoor", "OPEN", true);
-//    frontOldStatus = newStatus;
-//    Serial.println("Door open is published");
-//  }
-//}
-//
-//void getBackGarageDoorState() {
-//  int newStatus = digitalRead(frontDoorPin);
-//  if (newStatus != frontOldStatus && newStatus == 0) {
-//    client.publish("cmnd/security/doors/frontdoor", "CLOSED", true);
-//    frontOldStatus = newStatus;
-//    Serial.println("Door closed is published");
-//  }
-//  if (newStatus != frontOldStatus && newStatus == 1) {
-//    client.publish("cmnd/security/doors/frontdoor", "OPEN", true);
-//    frontOldStatus = newStatus;
-//    Serial.println("Door open is published");
-//  }
-//}
-
 void checkIn() {
   client.publish("checkIn/doorbellMCU", "OK");
 }
@@ -232,15 +128,7 @@ void checkIn() {
 //Run once setup
 void setup() {
   Serial.begin(115200);
-
-  // GPIO Pin Setup
-  pinMode(frontDoorPin, INPUT_PULLUP);
-  pinMode(garageToHouseDoorPin, INPUT_PULLUP);
-  pinMode(patioDoorPin, INPUT_PULLUP);
-  pinMode(kitchenDoorPin, INPUT_PULLUP);
-  pinMode(mainGarageDoorPin, INPUT_PULLUP);
-  pinMode(backGarageDoorPin, INPUT_PULLUP);
-
+  
   pinMode(doorBellPin, INPUT_PULLDOWN_16);
   pinMode(silencePin, OUTPUT);
 
@@ -253,12 +141,6 @@ void setup() {
   ArduinoOTA.begin();
 
   timer.setInterval(120000, checkIn);
-  timer.setInterval(500, getFrontDoorState);
-//  timer.setInterval(500, getGarageToHouseDoorState);
-//  timer.setInterval(500, getPatioDoorState);
-//  timer.setInterval(500, getKitchenDoorState);
-//  timer.setInterval(500, getMainGarageDoorState);
-//  timer.setInterval(500, getBackGarageDoorState);
   timer.setInterval(200, getDoorBell);
 
 }
