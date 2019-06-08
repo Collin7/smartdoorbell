@@ -23,7 +23,7 @@ SimpleTimer timer;
 //Door bell
 bool alreadyTriggered = false;
 const int doorBellPin = 16; //marked as D0 on the board
-const int silencePin = 2;  //marked as D4 on the board
+const int silencePin = 15;  //marked as D4 on the board
 
 bool boot = true;
 
@@ -112,6 +112,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 void getDoorBell() {
   if (digitalRead(doorBellPin) == 1 && alreadyTriggered == false) {
     client.publish("doorbell", "Ding");
+    Serial.println("Doorbell Pressed, just published - Ding");
     alreadyTriggered = true;
     timer.setTimeout(6000, resetTrigger);
   }
