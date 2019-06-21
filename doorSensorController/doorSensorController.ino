@@ -114,7 +114,7 @@ void getDoorBell() {
     client.publish("doorbell", "Ding");
     Serial.println("Doorbell Pressed, just published - Ding");
     alreadyTriggered = true;
-    timer.setTimeout(6000, resetTrigger);
+    timer.setTimeout(10000, resetTrigger);
   }
 }
 
