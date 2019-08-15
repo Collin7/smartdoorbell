@@ -12,7 +12,7 @@ const char* mqtt_server = "192.168.0.3";
 const int mqtt_port = 1883;
 const char *mqtt_user = "CDW-SmartHouse";
 const char *mqtt_pass = "!M0rpheus";
-const char *mqtt_client_name = "DoorSensorController"; // Client connections can't have the same connection name
+const char *mqtt_client_name = "DoorbellController"; // Client connections can't have the same connection name
 //USER CONFIGURED SECTION END//
 
 WiFiClient espClient;
@@ -28,7 +28,7 @@ const int silencePin = 15;  //marked as D4 on the board
 bool boot = true;
 
 //Topics
-const char* doorbellTopic = "cmnd/security/doorbell/commands";
+const char* doorbellTopic = "cmnd/doorbell/POWER";
 
 //Functions
 
@@ -98,23 +98,23 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println(newPayload);
   Serial.println();
   if (newTopic == doorbellTopic) {
-    if (newPayload == "Silent Doorbell") {
+    if (newPayload == "OFF") {
       digitalWrite(silencePin, LOW);
-      client.publish("state/doorbell", "Silent Doorbell", true);
+      client.publish("stat/doorbell/POWER", "OFF", true);
     }
-    if (newPayload == "Audio Doorbell") {
+    if (newPayload == "ON") {
       digitalWrite(silencePin, HIGH);
-      client.publish("state/doorbell", "Audio Doorbell", true);
+      client.publish("stat/doorbell/POWER", "ON", true);
     }
   }
 }
 
 void getDoorBell() {
   if (digitalRead(doorBellPin) == 1 && alreadyTriggered == false) {
-    client.publish("doorbell", "Ding");
+    client.publish("cmnd/pressed/POWER1", "ON");
     Serial.println("Doorbell Pressed, just published - Ding");
     alreadyTriggered = true;
-    timer.setTimeout(10000, resetTrigger);
+    timer.setTimeout(6000, resetTrigger);
   }
 }
 
@@ -138,7 +138,7 @@ void setup() {
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(callback);
 
-  ArduinoOTA.setHostname("doorbellMCU");
+  ArduinoOTA.setHostname("doorbellController");
   ArduinoOTA.begin();
 
   timer.setInterval(120000, checkIn);
