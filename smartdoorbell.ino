@@ -6,12 +6,12 @@
 #include <ArduinoOTA.h> //https://github.com/esp8266/Arduino/tree/master/libraries/ArduinoOTA
 
 //USER CONFIGURED SECTION START//
-const char* ssid = "Morpheus";
-const char* password = "b5eea63f65";
-const char* mqtt_server = "192.168.0.3";
+const char* ssid = "WIFI SSID";
+const char* password = "WIFI PASSWORD";
+const char* mqtt_server = "MQTT SERVER IP";
 const int mqtt_port = 1883;
-const char *mqtt_user = "CDW-SmartHouse";
-const char *mqtt_pass = "!M0rpheus";
+const char *mqtt_user = "MQTT USERNAME";
+const char *mqtt_pass = "MQTT PASSWORD";
 const char *mqtt_client_name = "DoorbellController"; // Client connections can't have the same connection name
 //USER CONFIGURED SECTION END//
 
