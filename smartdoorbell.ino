@@ -1,3 +1,4 @@
+#include <DHT.h>
 #include <SimpleTimer.h> //https://github.com/jfturcot/SimpleTimer
 #include <PubSubClient.h> //https://github.com/knolleary/pubsubclient
 #include <ESP8266WiFi.h>
@@ -18,6 +19,7 @@ const char *mqtt_client_name = "DoorbellController"; // Client connections can't
 WiFiClient espClient;
 PubSubClient client(espClient);
 SimpleTimer timer;
+DHT dht(DHT22_PIN, DHTTYPE);
 
 // Variables
 //Door bell
@@ -29,14 +31,75 @@ bool boot = true;
 
 //Topics
 const char* doorbellTopic = "cmnd/doorbell/POWER";
+#define temperature_topic "kitchen/sensor/dht/temperature"
+#define humidity_topic "kitchen/sensor/dht/humidity"
 
-//Functions
+#define DHTTYPE DHT22
+
+float temperature = 0;
+float humidity = 0;
+
+//Run once setup
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(doorBellPin, INPUT_PULLDOWN_16);
+  pinMode(silencePin, OUTPUT);
+
+  setup_wifi();
+
+  client.setServer(mqtt_server, mqtt_port);
+  client.setCallback(callback);
+
+  ArduinoOTA.setHostname("doorbellController");
+  ArduinoOTA.begin();
+
+  timer.setInterval(120000, checkIn);
+  timer.setInterval(200, getDoorBell);
+
+  timer.setInterval(50000, checkDHT); // Read Every 5sec
+  timer.setInterval(60000, publishDHT); // Publish Every 15min 60000 * 15
+
+}
+
+void loop() {
+  if (!client.connected()) {
+    reconnect();
+  }
+  client.loop();
+  ArduinoOTA.handle();
+  timer.run();
+}
+
+void checkDHT() {
+  temperature = dht.readTemperature();
+  delay(2100);
+  humidity = dht.readHumidity();
+
+  if (isnan(humidity) || isnan(temperature)) {
+    Serial.println("Failed to read from DHT sensor!");
+    return;
+  }
+  Serial.print("Sample OK: ");
+  Serial.print(temperature);
+  Serial.print(" *C, ");
+  Serial.print(humidity);
+  Serial.println(" RH%");
+
+}
+
+void publishDHT() {
+  client.publish(temperature_topic, String(temperature).c_str());
+  client.publish(humidity_topic, String(humidity).c_str());
+}
 
 void setup_wifi() {
   // We start by connecting to a WiFi network
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(ssid);
+
+  dht.begin();
 
   WiFi.begin(ssid, password);
 
@@ -124,33 +187,4 @@ void resetTrigger() {
 
 void checkIn() {
   client.publish("checkIn/doorbellMCU", "OK");
-}
-
-//Run once setup
-void setup() {
-  Serial.begin(115200);
-  
-  pinMode(doorBellPin, INPUT_PULLDOWN_16);
-  pinMode(silencePin, OUTPUT);
-
-  setup_wifi();
-
-  client.setServer(mqtt_server, mqtt_port);
-  client.setCallback(callback);
-
-  ArduinoOTA.setHostname("doorbellController");
-  ArduinoOTA.begin();
-
-  timer.setInterval(120000, checkIn);
-  timer.setInterval(200, getDoorBell);
-
-}
-
-void loop() {
-  if (!client.connected()) {
-    reconnect();
-  }
-  client.loop();
-  ArduinoOTA.handle();
-  timer.run();
 }
