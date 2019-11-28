@@ -6,35 +6,36 @@
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h> //https://github.com/esp8266/Arduino/tree/master/libraries/ArduinoOTA
 
-//USER CONFIGURED SECTION START//
-const char* ssid = "WIFI SSID";
+const char* host = "Doorbell Controller";
+const char* ssid = "SSID HERE";
 const char* password = "WIFI PASSWORD";
-const char* mqtt_server = "MQTT SERVER IP";
-const int mqtt_port = 1883;
 const char *mqtt_user = "MQTT USERNAME";
 const char *mqtt_pass = "MQTT PASSWORD";
-const char *mqtt_client_name = "DoorbellController"; // Client connections can't have the same connection name
-//USER CONFIGURED SECTION END//
+const int mqtt_port = 1883;
+
+#define mqtt_server "192.168.0.3"
+#define doorbellTopic "cmnd/doorbell/POWER"
+#define temperature_topic "kitchen/sensor/dht/temperature"
+#define humidity_topic "kitchen/sensor/dht/humidity"
+
+#define DHTTYPE DHT22
+
+//This can be used to output the date the code was compiled
+const char compile_date[] = __DATE__ " " __TIME__;
+
+//Door bell
+bool alreadyTriggered = false;
+const int doorBellPin = 16; //marked as D0 on the board
+const int silencePin = 15;  //marked as D8 on the board
+const int DHT22_PIN = 2;    //D4
+
+bool boot = true;
+
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 SimpleTimer timer;
 DHT dht(DHT22_PIN, DHTTYPE);
-
-// Variables
-//Door bell
-bool alreadyTriggered = false;
-const int doorBellPin = 16; //marked as D0 on the board
-const int silencePin = 15;  //marked as D4 on the board
-
-bool boot = true;
-
-//Topics
-const char* doorbellTopic = "cmnd/doorbell/POWER";
-#define temperature_topic "kitchen/sensor/dht/temperature"
-#define humidity_topic "kitchen/sensor/dht/humidity"
-
-#define DHTTYPE DHT22
 
 float temperature = 0;
 float humidity = 0;
@@ -46,27 +47,29 @@ void setup() {
   pinMode(doorBellPin, INPUT_PULLDOWN_16);
   pinMode(silencePin, OUTPUT);
 
+  dht.begin();
+
   setup_wifi();
 
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(callback);
 
-  ArduinoOTA.setHostname("doorbellController");
+  ArduinoOTA.setHostname("Doorbell Controller");
   ArduinoOTA.begin();
 
   timer.setInterval(120000, checkIn);
   timer.setInterval(200, getDoorBell);
 
-  timer.setInterval(50000, checkDHT); // Read Every 5sec
-  timer.setInterval(60000, publishDHT); // Publish Every 15min 60000 * 15
-
+  timer.setInterval(50000, checkDHT);
+  timer.setInterval(60000, publishDHT);
 }
 
 void loop() {
+  //If MQTT client can't connect to broker, then reconnect
   if (!client.connected()) {
     reconnect();
   }
-  client.loop();
+  client.loop(); //the mqtt function that processes MQTT messages
   ArduinoOTA.handle();
   timer.run();
 }
@@ -99,8 +102,6 @@ void setup_wifi() {
   Serial.print("Connecting to ");
   Serial.println(ssid);
 
-  dht.begin();
-
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -123,7 +124,7 @@ void reconnect() {
     if (retries < 15) {
       Serial.print("Attempting MQTT connection...");
       // Attempt to connect
-      if (client.connect(mqtt_client_name, mqtt_user, mqtt_pass)) {
+      if (client.connect(host, mqtt_user, mqtt_pass)) {
         Serial.println("connected");
         // Once connected, publish an announcement...
         if (boot == true) {
