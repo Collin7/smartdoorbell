@@ -118,7 +118,7 @@ void reconnect() {
     if (retries < 15) {
       Serial.print("Attempting MQTT connection...");
       // Attempt to connect
-      if (client.connect(MQTT_SERVER, MQTT_USERNAME, MQTT_PASSWORD)) {
+      if (client.connect(host, MQTT_USERNAME, MQTT_PASSWORD)) {
         Serial.println("connected");
         // Once connected, publish an announcement...
         if (boot == true) {
