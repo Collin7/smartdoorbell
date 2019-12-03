@@ -1,3 +1,4 @@
+#include <Credentials.h>
 #include <DHT.h>
 #include <SimpleTimer.h> //https://github.com/jfturcot/SimpleTimer
 #include <PubSubClient.h> //https://github.com/knolleary/pubsubclient
@@ -7,13 +8,7 @@
 #include <ArduinoOTA.h> //https://github.com/esp8266/Arduino/tree/master/libraries/ArduinoOTA
 
 const char* host = "Doorbell Controller";
-const char* ssid = "SSID HERE";
-const char* password = "WIFI PASSWORD";
-const char *mqtt_user = "MQTT USERNAME";
-const char *mqtt_pass = "MQTT PASSWORD";
-const int mqtt_port = 1883;
 
-#define mqtt_server "192.168.0.3"
 #define doorbellTopic "cmnd/doorbell/POWER"
 #define temperature_topic "kitchen/sensor/dht/temperature"
 #define humidity_topic "kitchen/sensor/dht/humidity"
@@ -30,7 +25,6 @@ const int silencePin = 15;  //marked as D8 on the board
 const int DHT22_PIN = 2;    //D4
 
 bool boot = true;
-
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -51,7 +45,7 @@ void setup() {
 
   setup_wifi();
 
-  client.setServer(mqtt_server, mqtt_port);
+  client.setServer(MQTT_SERVER, MQTT_PORT);
   client.setCallback(callback);
 
   ArduinoOTA.setHostname("Doorbell Controller");
@@ -100,9 +94,9 @@ void setup_wifi() {
   // We start by connecting to a WiFi network
   Serial.println();
   Serial.print("Connecting to ");
-  Serial.println(ssid);
+  Serial.println(WIFI_SSID);
 
-  WiFi.begin(ssid, password);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -124,7 +118,7 @@ void reconnect() {
     if (retries < 15) {
       Serial.print("Attempting MQTT connection...");
       // Attempt to connect
-      if (client.connect(host, mqtt_user, mqtt_pass)) {
+      if (client.connect(MQTT_SERVER, MQTT_USERNAME, MQTT_PASSWORD)) {
         Serial.println("connected");
         // Once connected, publish an announcement...
         if (boot == true) {
