@@ -2,7 +2,7 @@
 
 Slightly misleading name, but this was an ordianry wireless doorbell with an added NodeMCU Microprocessor to enable additional features.
 
-** The Features of this sketch are:
+### The Features of this sketch are:
 
 - To control the doorbell's chime or put it in silent mode. *Note I added a transister to the doorbell to allow for this*
 - MQTT protocol
