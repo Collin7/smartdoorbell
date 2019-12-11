@@ -10,6 +10,7 @@
 const char* host = "Doorbell Controller";
 
 #define doorbellTopic "cmnd/doorbell/POWER"
+#define doorbellRestartTopic "cmnd/doorbell/restart"
 #define temperature_topic "kitchen/sensor/dht/temperature"
 #define humidity_topic "kitchen/sensor/dht/humidity"
 
@@ -129,7 +130,7 @@ void reconnect() {
           client.publish("checkIn/DoorbellMCU", "Reconnected");
         }
         // ... and resubscribe
-        client.subscribe(doorbellTopic);
+        client.subscribe("cmnd/doorbell/#");
       }
       else {
         Serial.print("failed, rc=");
@@ -164,7 +165,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
       digitalWrite(silencePin, HIGH);
       client.publish("stat/doorbell/POWER", "ON", true);
     }
+  } else if (newTopic == doorbellRestartTopic) {
+    restartEsp();
   }
+
 }
 
 void getDoorBell() {
@@ -182,4 +186,9 @@ void resetTrigger() {
 
 void checkIn() {
   client.publish("checkIn/doorbellMCU", "OK");
+}
+
+void restartEsp() {
+  Serial.println("Restarting...");
+  ESP.restart();
 }
