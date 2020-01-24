@@ -1,11 +1,11 @@
 #include <Credentials.h>
 #include <DHT.h>
-#include <SimpleTimer.h> //https://github.com/jfturcot/SimpleTimer
-#include <PubSubClient.h> //https://github.com/knolleary/pubsubclient
+#include <SimpleTimer.h>
+#include <PubSubClient.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
-#include <ArduinoOTA.h> //https://github.com/esp8266/Arduino/tree/master/libraries/ArduinoOTA
+#include <ArduinoOTA.h>
 
 const char* host = "Doorbell Controller";
 
@@ -27,8 +27,8 @@ const int DHT22_PIN = 2;    //D4
 
 bool boot = true;
 
-WiFiClient espClient;
-PubSubClient client(espClient);
+WiFiClient espDoorbellClient;
+PubSubClient client(espDoorbellClient);
 SimpleTimer timer;
 DHT dht(DHT22_PIN, DHTTYPE);
 
@@ -176,7 +176,7 @@ void getDoorBell() {
     client.publish("cmnd/pressed/POWER1", "ON");
     Serial.println("Doorbell Pressed, just published - Ding");
     alreadyTriggered = true;
-    timer.setTimeout(6000, resetTrigger);
+    timer.setTimeout(10000, resetTrigger);
   }
 }
 
