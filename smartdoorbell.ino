@@ -173,12 +173,20 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 void getDoorBell() {
-  if (digitalRead(doorBellPin) == 1 && alreadyTriggered == false) {
+  int doorbellPressed = digitalRead(doorBellPin);
+  if (doorbellPressed) {
+    Serial.print(doorbellPressed);
     client.publish("cmnd/pressed/POWER1", "ON");
     Serial.println("Doorbell Pressed, just published - Ding");
-    alreadyTriggered = true;
-    timer.setTimeout(10000, resetTrigger);
+    doorbellPressed = 0;
+    delay(1000 * 15); // Wait 15 sec as LED pin flashes for 6 to 10 sec
   }
+//  if (digitalRead(doorBellPin) == 1 && alreadyTriggered == false) {
+//    client.publish("cmnd/pressed/POWER1", "ON");
+//    Serial.println("Doorbell Pressed, just published - Ding");
+//    alreadyTriggered = true;
+//    timer.setTimeout(10000, resetTrigger);
+//  }
 }
 
 void resetTrigger() {
