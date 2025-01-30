@@ -8,3 +8,5 @@ Slightly misleading name, but this was an ordianry wireless doorbell with an add
 - MQTT protocol
 - Publishing when doorbell button is pushed to allow the central server to send a push notification that someone is at the door and soon a CCTV snap image of who is at the door
 - Finally this microprocessor has a DHT22 sensor reporting the temperature and Humidity of the kitchen (That is where the doorbell device is mounted in my case.)
+
+## This is my old version of doorbell seen [here](https://blog.abugslife.co.za/a-smarter-doorbell/) and replaced with the new build [here](https://github.com/Collin7/doorbell)
